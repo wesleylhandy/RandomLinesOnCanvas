@@ -30,6 +30,7 @@
 		<button class="spinButton">Spin</button>
 		<button class="stopButton">Stop</button>
 		<button class="animateButton">Animate</button>
+		<button class="clearButton">Clear</button>
 
 	</section>
 
@@ -83,17 +84,25 @@
 		animated = setInterval(animateCanvas, 5);
 	});
 
+	$(".clearButton").on("click", function() {
+		clearInterval(turn);
+		clearInterval(animated);
+		clearCanvas();
+	});
+
 	// clear canvas
 	function clearCanvas() {
 		
 		c.width = c.width;
-		lines = [];
+	
 	}
 
 	
 
 	//get canvas
-	function createCanvas() {	
+	function createCanvas() {
+
+		lines.splice(0, lines.length);	
 
         var ctx = c.getContext("2d"); //ctx is the context
 
@@ -158,6 +167,7 @@
     
 
     function animateCanvas() {
+    	
     	clearCanvas();
 
         var ctx = c.getContext("2d"); //ctx is the context
