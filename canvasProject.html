@@ -26,9 +26,10 @@
 		<form>
 		</form>
 
-		<button class="myButton clickable">Draw</button>
+		<button class="drawButton clickable">Draw</button>
 		<button class="spinButton">Spin</button>
-		<button class="clearButton">Stop</button>
+		<button class="stopButton">Stop</button>
+		<button class="animateButton">Animate</button>
 
 	</section>
 
@@ -36,23 +37,24 @@
 </body>
 <script type="text/javascript">
 
-	var deg = 40; // initialize spin degrees on canvas element
+	
 
 	$(document).ready(function(){
 		createCanvas(); //initialize start screen
-
+		
 
 	});
 
 	var c = document.querySelector(".myCanvas");	//get canvas element
 
 	//draw button event listener
-	$(".myButton").on("click", function(){
+	$(".drawButton").on("click", function(){
 		clearCanvas();
 		createCanvas();
 	});
 
-	var turn; //initialize global variable for clearing interval
+	var turn, animated; //initialize global variables for clearing intervals
+	var deg = 40; // initialize spin degrees on canvas element
 
 	//spin button event listener
 	$(".spinButton").on("click", function(){
@@ -71,8 +73,13 @@
 	});
 
 	//stop button event listener to clear interval on spin
-	$(".clearButton").on("click", function(){
+	$(".stopButton").on("click", function(){
 		clearInterval(turn);
+		clearInterval(animated);
+	});
+
+	$(".animateButton").on("click", function(){
+		animated = setInterval(animateCanvas, 5);
 	});
 
 	// clear canvas
@@ -81,133 +88,208 @@
 		c.width = c.width;
 	}
 
+	var lines = [];
+
 	//get canvas
-	function createCanvas() {
-			
-			var c = document.querySelector(".myCanvas");	
+	function createCanvas() {	
 
-            var ctx = c.getContext("2d"); //ctx is the context
+        var ctx = c.getContext("2d"); //ctx is the context
 
-            var prevX = 100, prevY = 50; //initializes x and y coordinates for new line
+        var prevX = 100, prevY = 50; //initializes x and y coordinates for new line
 
-            // ctx.beginPath();
-            for (var i = 0; i < 100; i++){
-            	//create new random endpoint
-                var x = Math.floor(Math.random()*500);
-                var y = Math.floor(Math.random()*500);
-                //create random color for line
-                var r = Math.floor(Math.random()*255);
-            	var g = Math.floor(Math.random()*255);
-            	var b = Math.floor(Math.random()*255);
-            	var color = "rgb(" + r + ',' + g +',' + b + ")";
-            	
-            	// drawLine(x, y, color);
-            	
-            	ctx.lineWidth = 15; //sets width of line 
-            	ctx.strokeStyle = color; //assigns random color
-            	ctx.beginPath(); //start line
-            	ctx.moveTo(prevX,prevY); //moves the origin
-            	ctx.lineTo(x,y); //go to the bottom right corner
-         
-            	ctx.stroke(); //put it on the canvas
+        // ctx.beginPath();
+        for (var i = 0; i < 100; i++){
+        	//create new random endpoint
+            var x = Math.floor(Math.random()*500);
+            var y = Math.floor(Math.random()*500);
+            //create random color for line
+            var r = Math.floor(Math.random()*255);
+        	var g = Math.floor(Math.random()*255);
+        	var b = Math.floor(Math.random()*255);
+        	var color = "rgb(" + r + ',' + g +',' + b + ")";
+        	
+        	// drawLine(x, y, color);
+        	
+        	ctx.lineWidth = 15; //sets width of line 
+        	ctx.strokeStyle = color; //assigns random color
+        	ctx.beginPath(); //start line
+        	ctx.moveTo(prevX,prevY); //moves the origin
+        	ctx.lineTo(x,y); //go to the bottom right corner
+     
+        	ctx.stroke(); //put it on the canvas
 
-            	//store x & y for line of next iteration	
-            	prevX = x; 
-            	prevY = y;
-            	
-            }
+        	//push coordinates and color of line to array as an object
+        	if (prevX - x <= 0) {
+        		var slopeX1 = -1;
+        	} else {
+        		var slopeX1 = 1;
+        	}
+        	if (x - prevX <= 0) {
+        		var slopeX2 = -1;
+        	} else {
+        		var slopeX2 = 1;
+        	}
+        	if (prevY - y <= 0) {
+        		var slopeY1 = -1;
+        	} else {
+        		var slopeY1 = 1;
+        	} 
+        	if (y - prevY <= 0) {
+        		var slopeY2 = -1;
+        	} else {
+        		var slopeY2 = 1;
+        	}
 
-            function drawLine(x, y, color) {
-            	
-            	
-            	ctx.strokeStyle = color;
-            	ctx.beginPath();
-            	ctx.lineTo(x,y); //go to the bottom right corner
-         
-            	ctx.stroke();
 
-            }
-            
-            
+        	lines.push({"x1": prevX, "y1":prevY, "x2": x, "y2":y, "color": color, "slopeX1": slopeX1, "slopeX2": slopeX2, "slopeY1": slopeY1, "slopeY2": slopeY2 });
 
-            
-	}function doKeyDown(e){
-		//====================
-		//	THE W KEY
-		//====================
-		if (e.keyCode == 87) {
-			clearCanvas();
-			y = y - 10;
-			canvas_context.fillRect(x, y, 50, 30);
-		}
-		//====================
-		//	THE S KEY
-		//====================
-		if (e.keyCode == 83) {
-			clearCanvas();
-			y = y + 10;
-			canvas_context.fillRect(x, y, 50, 30);
-		}
-		//====================
-		//	THE A KEY
-		//====================
-		if (e.keyCode == 65) {
-			clearCanvas();
-			x = x - 10;
-			canvas_context.fillRect(x, y, 50, 30);
-		}
-		//====================
-		//	THE D KEY
-		//====================
-		if (e.keyCode == 68) {
-			clearCanvas();
-			x = x + 10;
-			canvas_context.fillRect(x, y, 50, 30);
-		}
-	}
 
-	function doKeyDown(e){
-		//====================
-		//	THE W KEY
-		//====================
-		if (e.keyCode == 87) {
-			clearCanvas();
-			y = y - 10;
-			canvas_context.fillRect(x, y, 50, 30);
-		}
-		//====================
-		//	THE S KEY
-		//====================
-		if (e.keyCode == 83) {
-			clearCanvas();
-			y = y + 10;
-			canvas_context.fillRect(x, y, 50, 30);
-		}
-		//====================
-		//	THE A KEY
-		//====================
-		if (e.keyCode == 65) {
-			clearCanvas();
-			x = x - 10;
-			canvas_context.fillRect(x, y, 50, 30);
-		}
-		//====================
-		//	THE D KEY
-		//====================
-		if (e.keyCode == 68) {
-			clearCanvas();
-			x = x + 10;
-			canvas_context.fillRect(x, y, 50, 30);
-		}
-	}
+        	//store x & y for line of next iteration	
+        	prevX = x; 
+        	prevY = y;
+        	
+        }
+        console.log(lines);
+    }
 
-	//random dots
+    
 
-	//connect the dots
+    function animateCanvas() {
+    	clearCanvas();
 
-	//keydown? or mouseX/mouseY???
+        var ctx = c.getContext("2d"); //ctx is the context
 
-	//random points (navigate to points?)
+        var prevX = 100, prevY = 50; //same as initial
+
+        for (let i = 0; i < lines.length; i++){
+
+        	//moving x1
+
+        	// if the slope is positive, this mean the line is increasing in number at the endpoint, so long as endpoint is within the cavnas, increment by 1, else, reverse the slope
+        	if (lines[i].slopeX1 === 1) {
+        		if (lines[i].x1 === 500) {
+        			lines[i].slopeX1 = -1;
+        			lines[i].x1--;
+        		} else if (lines[i].x1 + 1 === 500) {
+        			lines[i].slopeX1 = -1;
+        			lines[i].x1++;
+        		} else {
+        			lines[i].x1++;
+        		}
+        	//if the slope is negative, this means the line is decreasing in number at the endpiont; so long as the endpoint is within the canvas, decrease by 1, else reverse the slope
+        	} else if (lines[i].slopeX1 === -1 ) {
+        		if (lines[i].x1 === 0) {
+        			lines[i].slopeX1 = 1;
+        			lines[i].x1++;
+        		} else if (lines[i].x1 - 1 === 0) {
+        			lines[i].slopeX1 = 1;
+        			lines[i].x1--;
+        		} else {
+        			lines[i].x1--;
+        		}
+        	}
+
+        	//moving x2
+
+        	// if the slope is positive, this mean the line is increasing in number at the endpoint, so long as endpoint is within the cavnas, increment by 1, else, reverse the slope
+        	if (lines[i].slopeX2 === 1) {
+        		if (lines[i].x2 === 500) {
+        			lines[i].slopeX2 = -1;
+        			lines[i].x2--;
+        		} else if (lines[i].x2 + 1 === 500) {
+        			lines[i].slopeX2 = -1;
+        			lines[i].x2++;
+        		} else {
+        			lines[i].x2++;
+        		}
+        	//if the slope is negative, this means the line is decreasing in number at the endpiont; so long as the endpoint is within the canvas, decrease by 1, else reverse the slope
+        	} else if (lines[i].slopeX2 === -1 ) {
+        		if (lines[i].x2 === 0) {
+        			lines[i].slopeX2 = 1;
+        			lines[i].x2++;
+        		} else if (lines[i].x2 - 1 === 0) {
+        			lines[i].slopeX2 = 1;
+        			lines[i].x2--;
+        		} else {
+        			lines[i].x2--;
+        		}
+        	}
+
+        	//moving y1
+
+        	// if the slope is positive, this mean the line is increasing in number at the endpoint, so long as endpoint is within the cavnas, increment by 1, else, reverse the slope
+        	if (lines[i].slopeY1 === 1) {
+        		if (lines[i].y1 === 500) {
+        			lines[i].slopeY1 = -1;
+        			lines[i].y1--;
+        		} else if (lines[i].y1 + 1 === 500) {
+        			lines[i].slopeY1 = -1;
+        			lines[i].y1++;
+        		} else {
+        			lines[i].y1++;
+        		}
+        	//if the slope is negative, this means the line is decreasing in number at the endpiont; so long as the endpoint is within the canvas, decrease by 1, else reverse the slope
+        	} else if (lines[i].slopeY1 === -1 ) {
+        		if (lines[i].y1 === 0) {
+        			lines[i].slopeY1 = 1;
+        			lines[i].y1++;
+        		} else if (lines[i].y1 - 1 === 0) {
+        			lines[i].slopeY1 = 1;
+        			lines[i].y1--;
+        		} else {
+        			lines[i].y1--;
+        		}
+        	}
+
+        	//moving y2
+
+        	// if the slope is positive, this mean the line is increasing in number at the endpoint, so long as endpoint is within the cavnas, increment by 1, else, reverse the slope
+        	if (lines[i].slopeY2 === 1) {
+        		if (lines[i].y2 === 500) {
+        			lines[i].slopeY2 = -1;
+        			lines[i].y2--;
+        		} else if (lines[i].y2 + 1 === 500) {
+        			lines[i].slopeY2 = -1;
+        			lines[i].y2++;
+        		} else {
+        			lines[i].y2++;
+        		}
+        	//if the slope is negative, this means the line is decreasing in number at the endpiont; so long as the endpoint is within the canvas, decrease by 1, else reverse the slope
+        	} else if (lines[i].slopeY2 === -1 ) {
+        		if (lines[i].y2 === 0) {
+        			lines[i].slopeY2 = 1;
+        			lines[i].y2++;
+        		} else if (lines[i].y2 - 1 === 0) {
+        			lines[i].slopeY2 = 1;
+        			lines[i].y2--;
+        		} else {
+        			lines[i].y2--;
+        		}
+        	}
+        	
+	       	ctx.lineWidth = 15; //sets width of line 
+        	ctx.strokeStyle = lines[i].color; //assigns random color
+        	ctx.beginPath(); //start line
+        	ctx.moveTo(lines[i].x1,lines[i].y1); //moves the origin
+        	ctx.lineTo(lines[i].x2, lines[i].y2); //go to the bottom right corner
+     
+        	ctx.stroke(); //put it on the canvas
+
+        	//push coordinates and color of line to array as an object
+        	
+        	
+
+
+        	//store x & y for line of next iteration (is this needed?)	
+        	prevX = lines[i].x2; 
+        	prevY = lines[i].y2;
+
+        	console.log(lines[i]);
+
+        }
+
+    }
+           
 
 </script>
 
